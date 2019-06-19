@@ -18,83 +18,98 @@ class TodoListCreateAPIViewTestCase(APITestCase):
     url = reverse("api:company")
 
     def setUp(self):
-        pass
+        self.company = Company.objects.create(name='Test Company')
+        self.company = Company.objects.create(name='abc')
+        self.address = CompanyAddress.objects.create(company=self.company,
+                                                     postal_code=111111,
+                                                     city='Tokyo',
+                                                     state='Japan')
+        pincodes = [1, 1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 9]
+        for c in pincodes:
+            CompanyAddress.objects.create(company=self.company,
+                                          postal_code=c,
+                                          city='Tokyo',
+                                          state='Japan')
+
+        self.company_address_url = reverse(
+            'api:company_address', kwargs={'company_id': self.company.id})
+        self.company_specific_address_url = reverse(
+            'api:specific_company_address',
+            kwargs={
+                'company_id': self.company.id,
+                'address_id': self.address.id
+            })
 
     def test_create_company(self):
-        response = self.client.post(self.url, {"name": "Test Company"})
+        response = self.client.post(self.url, {"name": "Test Company 1"})
         self.assertEqual(201, response.status_code)
 
-    def tearDown(self):
-        Company.objects.filter(name='Test').delete()
-        return super().tearDown()
+    def test_create_company_address(self):
+        response = self.client.post(
+            self.company_address_url, {
+                "building_number": "test building",
+                "postal_code": "111111",
+                "locality": "lko",
+                "city": "tokyo",
+                "state": "tokyo"
+            })
+        self.assertEqual(201, response.status_code)
 
+    def test_company_address_update(self):
+        response = self.client.put(
+            self.company_specific_address_url, {
+                "building_number": "test building",
+                "postal_code": "111111",
+                "locality": "lko",
+                "city": "tokyo",
+                "state": "India"
+            })
+        self.assertEqual(200, response.status_code)
+        state = CompanyAddress.objects.get(pk=self.address.id)
+        self.assertEqual(state.state, 'India')
 
-# class TodoDetailAPIViewTestCase(APITestCase):
-#     def setUp(self):
-#         self.username = "john"
-#         self.email = "john@snow.com"
-#         self.password = "you_know_nothing"
-#         self.user = User.objects.create_user(self.username, self.email,
-#                                              self.password)
-#         self.todo = Todo.objects.create(user=self.user, name="Call Mom!")
-#         self.url = reverse("todos:detail", kwargs={"pk": self.todo.pk})
-#         self.token = Token.objects.create(user=self.user)
-#         self.api_authentication()
+    def test_company_address_delete(self):
+        response = self.client.delete(self.company_specific_address_url)
+        self.assertEqual(204, response.status_code)
 
-#     def api_authentication(self):
-#         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
+    def test_company_by_name_or_city(self):
+        response = self.client.get("{}?{}".format(reverse('api:search'),
+                                                  "search=tokyo"))
 
-#     def test_todo_object_bundle(self):
-#         """
-#         Test to verify todo object bundle
-#         """
-#         response = self.client.get(self.url)
-#         self.assertEqual(200, response.status_code)
+        self.assertEqual(len(response.json()), 1)
 
-#         todo_serializer_data = TodoSerializer(instance=self.todo).data
-#         response_data = json.loads(response.content)
-#         self.assertEqual(todo_serializer_data, response_data)
+        response = self.client.get("{}?{}".format(reverse('api:search'),
+                                                  "search=abc"))
 
-#     def test_todo_object_update_authorization(self):
-#         """
-#             Test to verify that put call with different user token
-#         """
-#         new_user = User.objects.create_user("newuser", "new@user.com",
-#                                             "newpass")
-#         new_token = Token.objects.create(user=new_user)
-#         self.client.credentials(HTTP_AUTHORIZATION='Token ' + new_token.key)
+        self.assertEqual(len(response.json()), 1)
 
-#         # HTTP PUT
-#         response = self.client.put(self.url, {"name", "Hacked by new user"})
-#         self.assertEqual(403, response.status_code)
+        response = self.client.get("{}?{}".format(reverse('api:search'),
+                                                  "search=tok"))
 
-#         # HTTP PATCH
-#         response = self.client.patch(self.url, {"name", "Hacked by new user"})
-#         self.assertEqual(403, response.status_code)
+        self.assertEqual(len(response.json()), 0)
 
-#     def test_todo_object_update(self):
-#         response = self.client.put(self.url, {"name": "Call Dad!"})
-#         response_data = json.loads(response.content)
-#         todo = Todo.objects.get(id=self.todo.id)
-#         self.assertEqual(response_data.get("name"), todo.name)
+    def test_pincode_size(self):
 
-#     def test_todo_object_partial_update(self):
-#         response = self.client.patch(self.url, {"done": True})
-#         response_data = json.loads(response.content)
-#         todo = Todo.objects.get(id=self.todo.id)
-#         self.assertEqual(response_data.get("done"), todo.done)
+        response = self.client.get(
+            reverse('api:postal_code_size', kwargs={'size': 0}))
 
-#     def test_todo_object_delete_authorization(self):
-#         """
-#             Test to verify that put call with different user token
-#         """
-#         new_user = User.objects.create_user("newuser", "new@user.com",
-#                                             "newpass")
-#         new_token = Token.objects.create(user=new_user)
-#         self.client.credentials(HTTP_AUTHORIZATION='Token ' + new_token.key)
-#         response = self.client.delete(self.url)
-#         self.assertEqual(403, response.status_code)
+        # since 6 different pincodes
+        self.assertEqual(len(response.json()), 6)
 
-#     def test_todo_object_delete(self):
-#         response = self.client.delete(self.url)
-#         self.assertEqual(204, response.status_code)
+        response = self.client.get(
+            reverse('api:postal_code_size', kwargs={'size': 2}))
+
+        # since 1,2,3,4
+        self.assertEqual(len(response.json()), 4)
+
+        response = self.client.get(
+            reverse('api:postal_code_size', kwargs={'size': 10}))
+
+        # none
+        self.assertEqual(len(response.json()), 0)
+
+        response = self.client.get(
+            reverse('api:postal_code_size', kwargs={'size': 4}))
+
+        # only 4
+        self.assertEqual(len(response.json()), 1)

@@ -72,7 +72,7 @@ class CompanyDetailsBySearch(ListAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanyInfoSerializer
     filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', 'companyaddress__city')
+    search_fields = ('name', '=companyaddress__city')
 
 
 class CompanyAddressView(APIView):
@@ -156,7 +156,7 @@ class CompanyAddressDetails(APIView):
     def delete(self, request, company_id, address_id):
         obj = self.get_object(company_id, address_id)
         obj.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class PostalCodeView(APIView):
