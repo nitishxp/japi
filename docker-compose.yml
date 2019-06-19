@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  web:
+    build:
+     context: .
+     dockerfile: Dockerfile
+    container_name: web
+    hostname: web
+    # command: python /code/manage.py makemigrations
+    # command: python /code/manage.py migrate
+    # command: python /code/manage.py runserver 0.0.0.0:8000
+    command: /web-entrypoint.sh
+    volumes:
+      - ./static:/code/static
+      - ./logs:/code/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    restart: always
