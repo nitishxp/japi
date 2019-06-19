@@ -16,6 +16,3 @@ services:
       - ./logs:/code/logs
     ports:
       - "8080:8000"
-    depends_on:
-      - rabbitmq
-    restart: always
