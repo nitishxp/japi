@@ -15,7 +15,7 @@ services:
       - ./static:/code/static
       - ./logs:/code/logs
     ports:
-      - "8000:8000"
+      - "8080:8000"
     depends_on:
       - rabbitmq
     restart: always
