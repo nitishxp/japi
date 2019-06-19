@@ -15,9 +15,6 @@ services:
     # command: python /code/manage.py migrate
     # command: python /code/manage.py runserver 0.0.0.0:8000
     command: /web-entrypoint.sh
-    volumes:
-      - ./static:/code/static
-      - ./logs:/code/logs
     ports:
       - "8080:8000"
 
