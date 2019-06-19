@@ -1,0 +1,4 @@
+HOW TO RUN THE CODE
+
+API DOCUMENTATION PATH:
+http://localhost:8080/api/docs/ 

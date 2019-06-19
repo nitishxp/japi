@@ -1,0 +1,16 @@
+*Task Details
+Design a database schema (create necessary models) to store postal addresses of various companies. Address consists of the following components (sorted by increasing order of geographic area):
+Company Name (To be unique, for simplicity)
+Building number
+Postal code
+Locality
+City
+State
+For simplicity, consider, a Postal Code can only be inside a single Locality.
+Create the following RESTful APIs (Authentication not required):
+To create/read/update/delete company addresses.
+To retrieve address of a company by providing company name.
+To list all the companies in a certain city.
+To retrieve all the Postal Codes which has more than X number of companies. X to be supplied to the API as URL parameter.
+Follow PEP 8 -- Style Guide for Python Code.
+Bonus Points:
