@@ -18,23 +18,15 @@ class TodoListCreateAPIViewTestCase(APITestCase):
     url = reverse("api:company")
 
     def setUp(self):
-       Company.objects.create(name='Test')
+        pass
 
-    def api_authentication(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-
-    def test_create_todo(self):
-        response = self.client.post(self.url, {"name": "Clean the room!"})
+    def test_create_company(self):
+        response = self.client.post(self.url, {"name": "Test Company"})
         self.assertEqual(201, response.status_code)
 
-    def test_user_todos(self):
-        """
-        Test to verify user todos list
-        """
-        Todo.objects.create(user=self.user, name="Clean the car!")
-        response = self.client.get(self.url)
-        self.assertTrue(
-            len(json.loads(response.content)) == Todo.objects.count())
+    def tearDown(self):
+        Company.objects.filter(name='Test').delete()
+        return super().tearDown()
 
 
 # class TodoDetailAPIViewTestCase(APITestCase):
