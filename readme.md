@@ -1,8 +1,5 @@
 HOW TO RUN THE CODE
 
-API DOCUMENTATION PATH:
-http://localhost:8080/api/docs/ 
-
 Please follow the below steps to the attached code:
 
 Step 1:
@@ -18,5 +15,9 @@ Step 3:
 
 Step 4:
     Navigate to http://localhost:8080/
+
+
+API DOCUMENTATION PATH:
+http://localhost:8080/api/docs/ 
 
     
