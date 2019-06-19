@@ -1,6 +1,10 @@
 version: '3'
 
 services:
+  db:
+    image: postgres:10.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
   web:
     build:
      context: .
@@ -16,3 +20,6 @@ services:
       - ./logs:/code/logs
     ports:
       - "8080:8000"
+
+volumes:
+  postgres_data:
